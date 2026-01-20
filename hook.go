@@ -43,10 +43,11 @@ func ParseHookEvent() (*HookEvent, error) {
 }
 
 // FormatNotification converts a HookEvent into a Notification with appropriate title and body
-func FormatNotification(event *HookEvent) Notification {
+// Returns nil if the notification should be skipped (e.g., duplicate permission notifications)
+func FormatNotification(event *HookEvent) *Notification {
 	switch event.HookEventName {
-	case "PreToolUse":
-		return formatPreToolUse(event)
+	case "PreToolUse", "PermissionRequest":
+		return formatPermissionRequest(event)
 	case "Notification":
 		return formatNotificationEvent(event)
 	case "Stop":
@@ -55,30 +56,58 @@ func FormatNotification(event *HookEvent) Notification {
 		return formatSessionStart(event)
 	default:
 		// Generic fallback
-		return Notification{
+		return &Notification{
 			Title: "Claude Code",
 			Body:  event.HookEventName,
 		}
 	}
 }
 
-// formatPreToolUse formats a PreToolUse event based on the tool type
-func formatPreToolUse(event *HookEvent) Notification {
+// formatPermissionRequest formats a PermissionRequest/PreToolUse event based on the tool type
+func formatPermissionRequest(event *HookEvent) *Notification {
 	title := "Permission: " + event.ToolName
 
 	var body string
 	switch event.ToolName {
 	case "Bash":
-		// Extract command from tool_input
+		// Extract command and description from tool_input
 		if cmd, ok := event.ToolInput["command"].(string); ok {
 			body = cmd
-		} else if desc, ok := event.ToolInput["description"].(string); ok {
+			// Truncate long commands
+			if len(body) > 300 {
+				body = body[:297] + "..."
+			}
+		}
+		// Add description if available
+		if desc, ok := event.ToolInput["description"].(string); ok && desc != "" {
+			if body != "" {
+				body = desc + "\n\n" + body
+			} else {
+				body = desc
+			}
+		}
+	case "Write":
+		if path, ok := event.ToolInput["file_path"].(string); ok {
+			body = "Create/overwrite: " + path
+		}
+	case "Edit":
+		if path, ok := event.ToolInput["file_path"].(string); ok {
+			body = "Edit: " + path
+		}
+	case "Read":
+		if path, ok := event.ToolInput["file_path"].(string); ok {
+			body = "Read: " + path
+		}
+	case "Task":
+		// Agent task
+		if desc, ok := event.ToolInput["description"].(string); ok {
 			body = desc
 		}
-	case "Write", "Edit", "Read":
-		// Extract file_path from tool_input
-		if path, ok := event.ToolInput["file_path"].(string); ok {
-			body = path
+		if prompt, ok := event.ToolInput["prompt"].(string); ok && body == "" {
+			body = prompt
+			if len(body) > 200 {
+				body = body[:197] + "..."
+			}
 		}
 	default:
 		// For other tools, try to get a meaningful summary
@@ -95,46 +124,53 @@ func formatPreToolUse(event *HookEvent) Notification {
 		body = event.ToolName + " operation"
 	}
 
-	return Notification{
+	return &Notification{
 		Title: title,
 		Body:  body,
 	}
 }
 
 // formatNotificationEvent formats a Notification hook event
-func formatNotificationEvent(event *HookEvent) Notification {
+// Returns nil for permission-related notifications (handled by PermissionRequest hook)
+func formatNotificationEvent(event *HookEvent) *Notification {
+	// Skip permission-related notifications to avoid duplicates
+	// These are already handled by the PermissionRequest hook
+	if event.NotificationType == "permission_prompt" {
+		return nil
+	}
+
 	body := event.Message
 	if body == "" {
 		body = "Notification from Claude Code"
 	}
 
-	return Notification{
+	return &Notification{
 		Title: "Claude Code",
 		Body:  body,
 	}
 }
 
 // formatStop formats a Stop event
-func formatStop(event *HookEvent) Notification {
+func formatStop(event *HookEvent) *Notification {
 	body := "Task completed"
 	if event.Cwd != "" {
 		body = event.Cwd
 	}
 
-	return Notification{
+	return &Notification{
 		Title: "Task Complete",
 		Body:  body,
 	}
 }
 
 // formatSessionStart formats a SessionStart event
-func formatSessionStart(event *HookEvent) Notification {
+func formatSessionStart(event *HookEvent) *Notification {
 	body := "New session"
 	if event.Cwd != "" {
 		body = event.Cwd
 	}
 
-	return Notification{
+	return &Notification{
 		Title: "Session Started",
 		Body:  body,
 	}

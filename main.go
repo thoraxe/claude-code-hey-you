@@ -25,9 +25,14 @@ func main() {
 	// Format the notification based on the event type
 	notification := FormatNotification(event)
 
+	// Skip if notification should be filtered (e.g., duplicate permission notifications)
+	if notification == nil {
+		return
+	}
+
 	// Send to ntfy
 	client := NewNtfyClient(cfg)
-	if err := client.Send(notification); err != nil {
+	if err := client.Send(*notification); err != nil {
 		fmt.Fprintf(os.Stderr, "error sending notification: %s\n", err)
 		os.Exit(1)
 	}
