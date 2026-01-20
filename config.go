@@ -14,6 +14,8 @@ type Config struct {
 	Topic    string `toml:"topic"`
 	Server   string `toml:"server"`
 	Priority string `toml:"priority"`
+	Test     bool   // CLI-only: send a test notification
+	Version  bool   // CLI-only: print version and exit
 }
 
 // DefaultConfig returns the default configuration
@@ -46,16 +48,16 @@ func configFilePath() string {
 	if runtime.GOOS == "windows" {
 		appData := os.Getenv("APPDATA")
 		if appData != "" {
-			return filepath.Join(appData, "claude-ntfy", "config.toml")
+			return filepath.Join(appData, "claude-code-hey-you", "config.toml")
 		}
 	}
 
-	// Unix-like: ~/.config/claude-ntfy/config.toml
+	// Unix-like: ~/.config/claude-code-hey-you/config.toml
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(home, ".config", "claude-ntfy", "config.toml")
+	return filepath.Join(home, ".config", "claude-code-hey-you", "config.toml")
 }
 
 // loadConfigFile loads configuration from the config file if it exists
@@ -101,6 +103,8 @@ func loadFlags(cfg *Config) {
 	topic := flag.String("topic", "", "ntfy topic to publish to")
 	server := flag.String("server", "", "ntfy server URL (default: https://ntfy.sh)")
 	priority := flag.String("priority", "", "notification priority (min, low, default, high, urgent)")
+	test := flag.Bool("test", false, "send a test notification (no stdin required)")
+	version := flag.Bool("version", false, "print version and exit")
 
 	flag.Parse()
 
@@ -113,6 +117,8 @@ func loadFlags(cfg *Config) {
 	if *priority != "" {
 		cfg.Priority = *priority
 	}
+	cfg.Test = *test
+	cfg.Version = *version
 }
 
 // Validate checks if the configuration is valid

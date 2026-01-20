@@ -1,6 +1,6 @@
 .PHONY: build build-all clean test
 
-BINARY_NAME=claude-ntfy
+BINARY_NAME=claude-code-hey-you
 LDFLAGS=-ldflags "-s -w"
 
 # Build for current platform

@@ -22,18 +22,19 @@ jobs:
       - name: Build binaries
         run: |
           mkdir -p dist
+          VERSION=${GITHUB_REF_NAME}
 
           # Windows
-          GOOS=windows GOARCH=amd64 go build -ldflags "-s -w" -o dist/claude-ntfy-windows-amd64.exe
-          GOOS=windows GOARCH=arm64 go build -ldflags "-s -w" -o dist/claude-ntfy-windows-arm64.exe
+          GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.Version=$VERSION" -o dist/claude-code-hey-you-windows-amd64.exe
+          GOOS=windows GOARCH=arm64 go build -ldflags "-s -w -X main.Version=$VERSION" -o dist/claude-code-hey-you-windows-arm64.exe
 
           # Linux
-          GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o dist/claude-ntfy-linux-amd64
-          GOOS=linux GOARCH=arm64 go build -ldflags "-s -w" -o dist/claude-ntfy-linux-arm64
+          GOOS=linux GOARCH=amd64 go build -ldflags "-s -w -X main.Version=$VERSION" -o dist/claude-code-hey-you-linux-amd64
+          GOOS=linux GOARCH=arm64 go build -ldflags "-s -w -X main.Version=$VERSION" -o dist/claude-code-hey-you-linux-arm64
 
           # macOS
-          GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w" -o dist/claude-ntfy-darwin-amd64
-          GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w" -o dist/claude-ntfy-darwin-arm64
+          GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w -X main.Version=$VERSION" -o dist/claude-code-hey-you-darwin-amd64
+          GOOS=darwin GOARCH=arm64 go build -ldflags "-s -w -X main.Version=$VERSION" -o dist/claude-code-hey-you-darwin-arm64
 
       - name: Create checksums
         run: |
@@ -44,11 +45,11 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist/claude-ntfy-windows-amd64.exe
-            dist/claude-ntfy-windows-arm64.exe
-            dist/claude-ntfy-linux-amd64
-            dist/claude-ntfy-linux-arm64
-            dist/claude-ntfy-darwin-amd64
-            dist/claude-ntfy-darwin-arm64
+            dist/claude-code-hey-you-windows-amd64.exe
+            dist/claude-code-hey-you-windows-arm64.exe
+            dist/claude-code-hey-you-linux-amd64
+            dist/claude-code-hey-you-linux-arm64
+            dist/claude-code-hey-you-darwin-amd64
+            dist/claude-code-hey-you-darwin-arm64
             dist/checksums.txt
           generate_release_notes: true

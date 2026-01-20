@@ -1,29 +1,29 @@
-# claude-ntfy
+# claude-code-hey-you
 
 Minimal cross-platform bridge from Claude Code hooks to [ntfy](https://ntfy.sh) notifications.
 
 ## Installation
 
-Download the binary for your platform from the [releases page](https://github.com/user/claude-ntfy/releases), or build from source:
+Download the binary for your platform from the [releases page](https://github.com/user/claude-code-hey-you/releases), or build from source:
 
 ```bash
-go build -ldflags "-s -w" -o claude-ntfy
+go build -ldflags "-s -w" -o claude-code-hey-you
 ```
 
 ## Usage
 
 ```bash
 # Basic - topic as argument
-claude-ntfy --topic my-alerts
+claude-code-hey-you --topic my-alerts
 
 # With custom server
-claude-ntfy --topic my-alerts --server https://ntfy.example.com
+claude-code-hey-you --topic my-alerts --server https://ntfy.example.com
 
 # With priority
-claude-ntfy --topic my-alerts --priority high
+claude-code-hey-you --topic my-alerts --priority high
 
 # Via environment variables
-NTFY_TOPIC=my-alerts claude-ntfy
+NTFY_TOPIC=my-alerts claude-code-hey-you
 ```
 
 ## Configuration
@@ -34,8 +34,8 @@ Configuration priority (highest to lowest):
 3. Config file
 
 Config file location:
-- Windows: `%APPDATA%\claude-ntfy\config.toml`
-- Unix: `~/.config/claude-ntfy/config.toml`
+- Windows: `%APPDATA%\claude-code-hey-you\config.toml`
+- Unix: `~/.config/claude-code-hey-you/config.toml`
 
 ```toml
 topic = "my-alerts"
@@ -53,19 +53,19 @@ Add to `~/.claude/settings.json` (or `%USERPROFILE%\.claude\settings.json` on Wi
     "PermissionRequest": [
       {
         "matcher": "",
-        "hooks": [{"type": "command", "command": "claude-ntfy --topic my-alerts"}]
+        "hooks": [{"type": "command", "command": "claude-code-hey-you --topic my-alerts"}]
       }
     ],
     "Notification": [
       {
         "matcher": "",
-        "hooks": [{"type": "command", "command": "claude-ntfy --topic my-alerts"}]
+        "hooks": [{"type": "command", "command": "claude-code-hey-you --topic my-alerts"}]
       }
     ],
     "Stop": [
       {
         "matcher": "",
-        "hooks": [{"type": "command", "command": "claude-ntfy --topic my-alerts"}]
+        "hooks": [{"type": "command", "command": "claude-code-hey-you --topic my-alerts"}]
       }
     ]
   }
